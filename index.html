@@ -1,0 +1,828 @@
+<title>Signal &amp; Script</title>
+<meta name="description" content="A learning log covering cybersecurity practice on TryHackMe and Python fundamentals on Mimo.">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    --bg:#eef1ef;
+    --surface:#ffffff;
+    --surface-2:#e3e9e5;
+    --ink:#12201d;
+    --ink-soft:#4c5b56;
+    --ink-faint:#7c8a85;
+    --border:#d2ddd6;
+    --accent-thm:#1c6b5a;
+    --accent-thm-soft:#e2efe9;
+    --accent-py:#a85a1a;
+    --accent-py-soft:#f4e7d8;
+    --accent-ink:#ffffff;
+    --focus:#1c6b5a;
+    --shadow: 0 1px 2px rgba(18,32,29,.06), 0 8px 24px -12px rgba(18,32,29,.18);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0c1614;
+      --surface:#121e1b;
+      --surface-2:#182622;
+      --ink:#edf3f0;
+      --ink-soft:#a9bcb5;
+      --ink-faint:#6f827b;
+      --border:#25342f;
+      --accent-thm:#57c1a5;
+      --accent-thm-soft:#173029;
+      --accent-py:#e3944f;
+      --accent-py-soft:#2e2013;
+      --accent-ink:#0c1614;
+      --focus:#57c1a5;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px -14px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0c1614;
+    --surface:#121e1b;
+    --surface-2:#182622;
+    --ink:#edf3f0;
+    --ink-soft:#a9bcb5;
+    --ink-faint:#6f827b;
+    --border:#25342f;
+    --accent-thm:#57c1a5;
+    --accent-thm-soft:#173029;
+    --accent-py:#e3944f;
+    --accent-py-soft:#2e2013;
+    --accent-ink:#0c1614;
+    --focus:#57c1a5;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px -14px rgba(0,0,0,.6);
+  }
+
+  *{ box-sizing:border-box; }
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Source Sans 3', system-ui, -apple-system, sans-serif;
+    padding-inline:20px;
+    padding-block:0 48px;
+    line-height:1.55;
+  }
+  a{ color:inherit; }
+  .wrap{ max-width:1080px; margin-inline:auto; }
+
+  code, .mono, .tag, .meta, .num{
+    font-family:'IBM Plex Mono', ui-monospace, Menlo, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- Header ---------- */
+  header.site{
+    padding-block: 40px 28px;
+    border-bottom:1px solid var(--border);
+    margin-bottom:32px;
+  }
+  .brand-row{
+    display:flex; align-items:baseline; justify-content:space-between; gap:16px; flex-wrap:wrap;
+  }
+  .brand{
+    font-family:'Fraunces', Georgia, serif;
+    font-weight:700;
+    font-size:clamp(1.9rem, 4vw, 2.6rem);
+    letter-spacing:-0.01em;
+    text-wrap:balance;
+  }
+  .brand .amp{ color:var(--accent-thm); font-style:italic; }
+  .tagline{
+    color:var(--ink-soft);
+    font-size:1.02rem;
+    max-width:52ch;
+    margin-top:10px;
+  }
+  .theme-toggle{
+    border:1px solid var(--border);
+    background:var(--surface);
+    color:var(--ink-soft);
+    border-radius:999px;
+    padding:6px 14px;
+    font-size:.8rem;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .theme-toggle:focus-visible, button:focus-visible, input:focus-visible, .chip:focus-visible, .card:focus-visible{
+    outline:2px solid var(--focus); outline-offset:2px;
+  }
+
+  /* ---------- About + stats ---------- */
+  .about{
+    display:grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap:24px;
+    margin-bottom:40px;
+  }
+  @media (max-width:720px){ .about{ grid-template-columns:1fr; } }
+  .about p{ color:var(--ink-soft); max-width:60ch; }
+  .about p + p{ margin-top:10px; }
+  .stats{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:1px;
+    background:var(--border);
+    border:1px solid var(--border);
+    border-radius:12px;
+    overflow:hidden;
+    align-self:start;
+  }
+  .stat{
+    background:var(--surface);
+    padding:16px 14px;
+    text-align:left;
+  }
+  .stat .num{ display:block; font-size:1.5rem; font-weight:600; color:var(--ink); }
+  .stat .label{ display:block; font-size:.72rem; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.06em; margin-top:4px; }
+
+  /* ---------- Controls ---------- */
+  .controls{
+    position:sticky;
+    top:env(safe-area-inset-top, 0px);
+    background:var(--bg);
+    padding-block:14px;
+    margin-bottom:24px;
+    z-index:5;
+    border-bottom:1px solid var(--border);
+  }
+  .cat-row{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+  .sub-row{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+  .chip{
+    border:1px solid var(--border);
+    background:var(--surface);
+    color:var(--ink-soft);
+    padding:7px 14px;
+    border-radius:999px;
+    font-size:.84rem;
+    cursor:pointer;
+    line-height:1.2;
+  }
+  .chip[aria-pressed="true"]{
+    background:var(--ink);
+    color:var(--bg);
+    border-color:var(--ink);
+  }
+  .chip.thm[aria-pressed="true"]{ background:var(--accent-thm); border-color:var(--accent-thm); color:var(--accent-ink); }
+  .chip.py[aria-pressed="true"]{ background:var(--accent-py); border-color:var(--accent-py); color:var(--accent-ink); }
+  .search-row{ display:flex; gap:8px; }
+  .search-row input{
+    flex:1;
+    background:var(--surface);
+    border:1px solid var(--border);
+    color:var(--ink);
+    border-radius:10px;
+    padding:9px 12px;
+    font-size:.92rem;
+    font-family:inherit;
+  }
+  .count-line{ color:var(--ink-faint); font-size:.82rem; margin-top:8px; }
+
+  /* ---------- Grid ---------- */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(260px,1fr));
+    gap:16px;
+  }
+  .card{
+    text-align:left;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:18px;
+    cursor:pointer;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    height:100%;
+  }
+  .card:hover{ border-color: var(--ink-faint); }
+  .card-top{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .tag{
+    font-size:.68rem;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    padding:3px 9px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+  .tag.thm{ background:var(--accent-thm-soft); color:var(--accent-thm); }
+  .tag.py{ background:var(--accent-py-soft); color:var(--accent-py); }
+  .card .sub{ font-size:.72rem; color:var(--ink-faint); }
+  .card h3{
+    font-family:'Fraunces', Georgia, serif;
+    font-weight:600;
+    font-size:1.18rem;
+    line-height:1.3;
+    margin:0;
+    text-wrap:balance;
+  }
+  .card .excerpt{ color:var(--ink-soft); font-size:.9rem; flex:1; }
+  .card .meta{ font-size:.72rem; color:var(--ink-faint); border-top:1px dashed var(--border); padding-top:10px; }
+  .empty{ color:var(--ink-faint); padding:40px 0; text-align:center; }
+
+  /* ---------- Overlay ---------- */
+  .overlay{
+    position:fixed; inset:0;
+    background:rgba(10,16,15,.55);
+    display:flex; justify-content:center;
+    padding:24px 16px calc(24px + env(safe-area-inset-bottom, 0px));
+    overflow-y:auto;
+    z-index:20;
+  }
+  .overlay[hidden]{ display:none; }
+  .sheet{
+    background:var(--surface);
+    color:var(--ink);
+    border-radius:16px;
+    max-width:680px;
+    width:100%;
+    padding:32px clamp(20px,4vw,40px) 40px;
+    box-shadow:var(--shadow);
+    height:fit-content;
+    margin-top:env(safe-area-inset-top, 0px);
+  }
+  .sheet-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:6px; }
+  .sheet-close{
+    border:1px solid var(--border);
+    background:var(--surface-2);
+    color:var(--ink-soft);
+    width:32px; height:32px;
+    border-radius:50%;
+    cursor:pointer;
+    font-size:1rem;
+    flex:none;
+  }
+  .sheet h2{
+    font-family:'Fraunces', Georgia, serif;
+    font-weight:700;
+    font-size:clamp(1.4rem,3vw,1.9rem);
+    line-height:1.25;
+    margin:6px 0 14px;
+    text-wrap:balance;
+  }
+  .sheet .meta-line{ color:var(--ink-faint); font-size:.78rem; margin-bottom:18px; display:flex; gap:14px; flex-wrap:wrap; }
+  .sheet .tags{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:20px; }
+  .sheet .tags span{ font-size:.7rem; background:var(--surface-2); color:var(--ink-soft); padding:3px 9px; border-radius:999px; }
+  .sheet p{ margin:0 0 14px; color:var(--ink); }
+  .sheet p:last-of-type{ margin-bottom:0; }
+  .sheet pre{
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:14px 16px;
+    overflow-x:auto;
+    margin:0 0 16px;
+    font-size:.84rem;
+    line-height:1.55;
+  }
+  .sheet .nav-row{ display:flex; justify-content:space-between; margin-top:26px; border-top:1px solid var(--border); padding-top:16px; gap:10px; }
+  .sheet .nav-row button{
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    color:var(--ink-soft);
+    padding:8px 14px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:.82rem;
+    font-family:inherit;
+  }
+  .sheet .nav-row button:disabled{ opacity:.35; cursor:default; }
+
+  footer{
+    margin-top:56px;
+    padding-top:20px;
+    border-top:1px solid var(--border);
+    color:var(--ink-faint);
+    font-size:.8rem;
+    text-align:center;
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="site">
+    <div class="brand-row">
+      <div class="brand">Signal <span class="amp">&amp;</span> Script</div>
+      <button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false">Toggle theme</button>
+    </div>
+    <div class="tagline">A running log of two parallel skill sets: reading attacker behaviour on TryHackMe, and writing Python on Mimo. Posted as each concept lands, not polished after the fact.</div>
+  </header>
+
+  <section class="about">
+    <div>
+      <p>I'm Dan. By day I work second line support at a small local MSP; the rest of the time I'm teaching myself the skills for a move into cybersecurity, one room and one lesson at a time. I hold CompTIA Security+ and A+, and everything here is self-directed: no bootcamp, no course cohort, just consistent daily practice.</p>
+      <p>This site is where that practice gets written down properly. TryHackMe entries cover the frameworks and hands-on rooms behind detection and incident response; Python entries track the fundamentals as I build them up on Mimo, aimed at scripting the kind of repetitive analysis work security tooling relies on.</p>
+    </div>
+    <div class="stats" id="statsBlock"></div>
+  </section>
+
+  <div class="controls">
+    <div class="cat-row" id="catRow"></div>
+    <div class="sub-row" id="subRow"></div>
+    <div class="search-row">
+      <input type="text" id="searchInput" placeholder="Search entries by title, topic or tag&hellip;" aria-label="Search entries">
+    </div>
+    <div class="count-line" id="countLine"></div>
+  </div>
+
+  <main class="grid" id="grid"></main>
+
+  <footer>Signal &amp; Script &middot; a self-taught log, updated as new rooms and lessons land.</footer>
+</div>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
+</div>
+
+<script>
+(function(){
+
+  var POSTS = [
+
+    /* ===================== TRYHACKME ===================== */
+    {
+      id:"thm-pyramid",
+      cat:"thm", sub:"Frameworks",
+      title:"The Pyramid of Pain: Why Some Indicators Cost Attackers More Than Others",
+      date:"2026-09-04",
+      meta:"TryHackMe &middot; Pyramid of Pain &middot; 661-day streak &middot; 136 pts",
+      tags:["Threat Intelligence","IOCs","TTPs"],
+      excerpt:"A framework for ranking indicators of compromise by how much it actually costs an attacker when you act on them, from a throwaway hash value up to their tactics, techniques and procedures.",
+      body:[
+        {t:"p", v:"The Pyramid of Pain ranks the indicators you use to detect an attacker by how much pain it causes them when you act on it. It isn't a detection tool by itself, it's a way of thinking about which indicators are actually worth your time."},
+        {t:"p", v:"At the bottom sit hash values and IP addresses, trivial and easy for an attacker to change. Append one byte to a file and its hash is completely different. Rotate an IP and the block is worthless within minutes. Move up through domain names, host artifacts and network artifacts and it gets progressively more annoying for an attacker to adapt around, since domains cost money and time to register and abandon."},
+        {t:"p", v:"At the very top sit TTPs, tactics, techniques and procedures. Detect those and an attacker essentially has to retrain and rebuild their entire approach. The lightbulb moment for me was realising why chasing hashes and IPs alone only gets a defender so far: real detection value comes from understanding attacker behaviour itself, which is a lot harder to fake your way around than a file signature."},
+        {t:"p", v:"Worked through hash analysis using VirusTotal style lookups, IP and domain based indicators including a punycode attack example (a domain using look-alike Unicode characters to imitate a trusted one), host and network artifacts such as suspicious process execution and unusual User-Agent strings, and finished with a practical exercise mapping real indicators onto the correct tier of the pyramid myself."}
+      ]
+    },
+    {
+      id:"thm-ckc",
+      cat:"thm", sub:"Frameworks",
+      title:"Walking the Cyber Kill Chain: Seven Stages, One Chance to Break It",
+      date:"2026-09-08",
+      meta:"TryHackMe &middot; Cyber Kill Chain &middot; 665-day streak &middot; 80 pts",
+      tags:["Threat Intelligence","Kill Chain","Lockheed Martin"],
+      excerpt:"Lockheed Martin's framework for how an attack actually unfolds, from reconnaissance through to the attacker's final objective, and why a defender only needs to win at one stage.",
+      body:[
+        {t:"p", v:"The Cyber Kill Chain breaks a cyber attack into seven distinct stages: reconnaissance, weaponization, delivery, exploitation, installation, command and control, and finally actions on objectives. The core idea is simple but powerful. An attacker has to succeed at every single stage to reach their goal, which means a defender only needs to break the chain at one point to stop the whole attack."},
+        {t:"p", v:"Walked through each phase in detail: reconnaissance and OSINT gathering (email harvesting, WHOIS lookups), weaponization of payloads, delivery methods like phishing emails and watering hole attacks, exploitation of known and zero-day vulnerabilities, installation techniques such as persistent backdoors and timestomping to alter file timestamps and evade forensic review, command and control channels including DNS tunneling, and finally exfiltration and actions on objectives."},
+        {t:"p", v:"The practical section was the strongest part of the room. Used the real world Target data breach from 2013 as a case study and mapped the actual attack techniques, things like exploiting a public-facing application and abusing PowerShell for lateral movement, onto the correct Kill Chain stage myself, rather than just reading about the theory secondhand."},
+        {t:"p", v:"Also picked up an important limitation of the model. The traditional Kill Chain focuses heavily on malware delivery and perimeter defence, so it doesn't account well for insider threats, which is exactly why newer frameworks like MITRE ATT&CK are usually used alongside it rather than as a replacement."}
+      ]
+    },
+    {
+      id:"thm-ukc",
+      cat:"thm", sub:"Frameworks",
+      title:"The Unified Kill Chain: 18 Phases Instead of 7",
+      date:"2026-09-10",
+      meta:"TryHackMe &middot; Unified Kill Chain &middot; 667-day streak &middot; 144 pts",
+      tags:["Threat Intelligence","Kill Chain","MITRE ATT&CK"],
+      excerpt:"Paul Pols' 2017 extension of the traditional Kill Chain, grouping 18 phases of an attack into three goals: getting In, moving Through a network, and getting Out with the objective achieved.",
+      body:[
+        {t:"p", v:"Following on from the traditional Cyber Kill Chain, this room covers Paul Pols' Unified Kill Chain, published in 2017 to complement frameworks like Lockheed Martin's and MITRE ATT&CK rather than replace them. Where the traditional model has 7 stages, the UKC breaks an attack down into 18 phases, grouped into three overall goals: getting In, moving Through the network, and getting Out with the objective achieved."},
+        {t:"p", v:"The In phase covers reconnaissance, weaponization, social engineering, exploitation, persistence, defence evasion and command and control. The Through phase is where an attacker pivots deeper into a network, escalates privileges, steals credentials and moves laterally between systems. The Out phase covers collection, exfiltration and impact, essentially where the attacker finally hits confidentiality, integrity or availability, known as the CIA triad."},
+        {t:"p", v:"What stood out most was working through scenario based questions rather than plain definitions: spotting failed admin logins as a privilege escalation attempt, or recognising Mimikatz activity on a workstation as credential access. Mapping real behaviour to the right phase felt a lot closer to actual analyst work than memorising a list of terms."},
+        {t:"p", v:"Finished with a practical matching real attacker actions to the correct UKC phase to reveal a flag. A clearer picture came out of this room of how these various kill chain models build on each other rather than compete for attention."}
+      ]
+    },
+    {
+      id:"thm-mitre",
+      cat:"thm", sub:"Frameworks",
+      title:"Inside the MITRE Ecosystem: ATT&CK, CAR and D3FEND",
+      date:"2026-09-13",
+      meta:"TryHackMe &middot; MITRE &middot; 670-day streak &middot; 136 pts",
+      tags:["MITRE ATT&CK","Detection Engineering","D3FEND"],
+      excerpt:"How ATT&CK gives defenders a shared language for adversary behaviour, how CAR turns that into ready-made detections, and how D3FEND flips the whole picture to focus on the defensive side.",
+      body:[
+        {t:"p", v:"This room goes deep on the ecosystem MITRE has built around understanding and stopping attackers. Started with the ATT&CK framework itself, a globally used knowledge base of tactics, techniques and procedures based on real world observed adversary behaviour, and worked through the matrix structure of tactics, techniques and sub-techniques using the ATT&CK Navigator."},
+        {t:"p", v:"The threat intelligence side felt most relevant to real analyst work. Took on the role of an analyst in the aviation sector and used ATT&CK to research an APT group known to target that industry, tracing their specific techniques and identifying gaps in defensive coverage rather than just reading definitions off a page."},
+        {t:"p", v:"Also worked through the Cyber Analytics Repository, which turns ATT&CK techniques into ready made detection logic with example queries for tools like Splunk, and D3FEND, which flips the perspective entirely by mapping out defensive techniques and countermeasures rather than attacker behaviour. Finished by looking at some of MITRE's newer frameworks, including ATLAS for threats against AI and machine learning systems."},
+        {t:"p", v:"The biggest takeaway was how these three pieces fit together: ATT&CK gives you a shared language for describing what happened, CAR turns that into something you can actually detect, and D3FEND tells you how to defend against it. Three angles on the same underlying problem."}
+      ]
+    },
+    {
+      id:"thm-apt28",
+      cat:"thm", sub:"Practical Challenges",
+      title:"Tracking APT28 Through the ATT&CK Navigator",
+      date:"2026-09-15",
+      meta:"TryHackMe &middot; Scenario exercise &middot; ATT&CK Navigator",
+      tags:["MITRE ATT&CK","APT28","Threat Intelligence"],
+      excerpt:"A scenario exercise mapping a real APT group's known techniques onto a full attack chain, from spearphishing links for initial access through to exfiltration over a multi-hop proxy.",
+      body:[
+        {t:"p", v:"A scenario based exercise using the MITRE ATT&CK Navigator to track an APT group, APT28, through a full attack chain against a fictional company. The setup: a security analyst receives intelligence that this group might be targeting the organisation, and has to map out exactly which techniques it's known to use at each stage, then apply that to real indicators showing up on the network."},
+        {t:"p", v:"Traced the attack from spearphishing links for initial access and reconnaissance, through targeting email accounts to build out resources, malicious files and links for execution, and PowerShell and Windows Command Shell as the scripting interpreters behind that execution. Then into persistence via registry run keys, defence evasion through rundll32 being abused for proxy execution, and network sniffing for discovery once inside."},
+        {t:"p", v:"Moved into lateral movement via SMB and Windows admin shares, identified SharePoint as the likely target for data theft given the company's intellectual property was the actual objective, and finished by working out how the group might use external and multi-hop proxies to exfiltrate data if its usual command and control channel got blocked."},
+        {t:"p", v:"Going technique by technique through a full chain like this, rather than looking at each one in isolation, builds a much better sense of pattern recognition than reading a group's profile page top to bottom ever does."}
+      ]
+    },
+    {
+      id:"thm-summit",
+      cat:"thm", sub:"Practical Challenges",
+      title:"Summit: Chasing a Simulated Adversary Up the Pyramid",
+      date:"2026-09-14",
+      meta:"TryHackMe &middot; Summit &middot; 671-day streak &middot; 180 pts",
+      tags:["Detection Engineering","Sigma","Pyramid of Pain"],
+      excerpt:"A hands-on purple team challenge: detect and block five malware samples one Pyramid of Pain tier at a time, writing real Sigma rules along the way, until the adversary finally gives up.",
+      body:[
+        {t:"p", v:"This was a hands on purple team challenge built directly on the Pyramid of Pain concept, and easily one of the most practical rooms so far. The scenario: a simulated adversary keeps executing malware samples on a workstation, and the job is to detect and block them at every level of the pyramid, forcing the attacker to work harder and harder until they finally give up."},
+        {t:"p", v:"Started at the bottom with hash values, checking an MD5 hash of sample1.exe against a threat database. Moved up to IP addresses, blocking the malicious IP on the firewall in both directions. Then domain names, tracing the IP back to its domain and setting a DNS filter to deny it outright."},
+        {t:"p", v:"From there it got more interesting. Wrote a Sigma rule to catch a Sysmon event for a registry modification that disabled real-time protection, then another Sigma rule to detect a network connection with a specific packet size beaconing out every 30 minutes, a classic command and control pattern. Finished by digging through the commands the attacker had actually run on the device, tracking down the file they were trying to access, and writing a final Sigma rule to catch that exact file modification attempt."},
+        {t:"p", v:"Going from reading about the Pyramid of Pain in theory to actually writing detection rules that climb it step by step made the whole concept click in a way the reading alone hadn't. Real detection engineering, not just definitions."}
+      ]
+    },
+    {
+      id:"thm-phishing",
+      cat:"thm", sub:"Phishing Analysis",
+      title:"Reading a Phishing Email Like an Analyst",
+      date:"2026-09-16",
+      meta:"TryHackMe &middot; Phishing Analysis Fundamentals &middot; 673-day streak &middot; 112 pts",
+      tags:["Phishing","Email Headers","Social Engineering"],
+      excerpt:"From the structure of an email address up to defanging a malicious URL: header analysis, decoding a base64 attachment, and spotting a spoofed sender in a real phishing sample.",
+      body:[
+        {t:"p", v:"This room walks through email from the ground up, starting with something as basic as the structure of an email address, then moving into the actual delivery mechanics: SMTP for sending, and POP3 versus IMAP for how a mailbox retrieves and syncs messages across devices."},
+        {t:"p", v:"The real value was in the hands on analysis. Opened raw .eml files in Thunderbird and viewed the message source to pull out header details like the X-Originating-IP, well beyond what the standard inbox view shows. Also worked through an email with a base64 encoded PDF attachment, decoding it with CyberChef to reveal a hidden flag embedded inside."},
+        {t:"p", v:"Then moved into how attackers actually abuse all of this: spoofed sender addresses, urgency in the subject line, brand impersonation, hidden or shortened links, and disguised attachments like invoice.pdf.exe. Practised defanging suspicious URLs and IPs, replacing characters like the dot and the @ symbol so they're safe to document without risk of an accidental click, and analysed a real phishing sample to identify the spoofed organisation, the actual sending address, and which mail server generated the Authentication-Results header."},
+        {t:"p", v:"Email is still one of the most common ways into an organisation, so being able to actually read the technical evidence behind a suspicious message, rather than just eyeballing it, feels like a genuinely useful skill to have locked in early."}
+      ]
+    },
+
+    /* ===================== PYTHON / MIMO ===================== */
+    {
+      id:"py-75",
+      cat:"py", sub:"Fundamentals",
+      title:"Compound Assignment: += and -=",
+      date:"2026-09-03",
+      meta:"Mimo &middot; Day 75",
+      tags:["Operators","Fundamentals"],
+      excerpt:"Two small operators that quietly show up everywhere: shortcuts for incrementing and decrementing a value without retyping the variable twice.",
+      body:[
+        {t:"p", v:"Today covered compound assignment operators, specifically += to add to a value and -= to subtract from it. Rather than writing out count = count + 1 in full, += and -= let you update a variable in place using a shorter, more readable form."},
+        {t:"code", v:"count = 0\ncount += 1   # same as count = count + 1, now 1\ncount += 5   # now 6\ncount -= 2   # now 4"},
+        {t:"p", v:"It looks like a small syntax shortcut, but it's the kind of foundational piece that matters once you're writing anything with real logic: incrementing a counter, tracking failed login attempts, or updating a running total while parsing a log file. Clean, readable code starts with knowing the shortcuts that keep it that way."}
+      ]
+    },
+    {
+      id:"py-76",
+      cat:"py", sub:"Loops",
+      title:"While Loops and the Infinite Loop Trap",
+      date:"2026-09-04",
+      meta:"Mimo &middot; Day 76",
+      tags:["While Loops","Control Flow"],
+      excerpt:"A while loop runs as long as its condition stays true, which means nothing inside the loop changing that condition is exactly how you accidentally write one that never stops.",
+      body:[
+        {t:"p", v:"Today's concept was while loops, and specifically what happens when the condition inside one is wrong. A while loop keeps running as long as its condition evaluates to true, which means it's on you to make sure something inside the loop actually changes that condition, otherwise you've built an infinite loop."},
+        {t:"code", v:"attempts = 0\nwhile attempts < 3:\n    print(\"checking...\")\n    attempts += 1   # without this line, the loop never ends\n\nwhile False:\n    print(\"this line never runs\")"},
+        {t:"p", v:"On the flip side, while False: won't execute at all, because the condition has to evaluate to true just to get in the door in the first place. It sounds basic, but this is exactly the kind of logic that matters in security work: think monitoring scripts or polling loops that need to run continuously without hanging or silently doing nothing."}
+      ]
+    },
+    {
+      id:"py-77",
+      cat:"py", sub:"Loops",
+      title:"Breaking a Loop with a Variable Condition",
+      date:"2026-09-05",
+      meta:"Mimo &middot; Day 77",
+      tags:["While Loops","Control Flow"],
+      excerpt:"Setting up a variable the loop checks on every pass, so that as soon as it stops meeting the condition, the loop exits cleanly on its own.",
+      body:[
+        {t:"p", v:"Today's concept was using a variable to control a loop, and having it break out once that variable no longer meets the condition. Instead of a loop running forever or a fixed number of times, you set up a variable that the loop checks on every pass, and as soon as that variable stops satisfying the condition, the loop stops."},
+        {t:"code", v:"connected = True\nretries = 0\n\nwhile connected:\n    retries += 1\n    if retries >= 5:\n        connected = False   # this flips the condition and ends the loop"},
+        {t:"p", v:"It's a small shift, but it's the difference between hardcoding behaviour and writing logic that responds to changing state. That idea shows up everywhere once you start looking for it: a counter tracking failed login attempts until it hits a threshold, or a process that needs to keep running until a specific condition is met and then stop cleanly."}
+      ]
+    },
+    {
+      id:"py-78",
+      cat:"py", sub:"Loops",
+      title:"Building My Own While Loops from Scratch",
+      date:"2026-09-06",
+      meta:"Mimo &middot; Day 78",
+      tags:["While Loops","Self-Test"],
+      excerpt:"Testing myself rather than reading new material: writing while loops from scratch with self-assigned variables and watching how += and -= push a condition toward true or false.",
+      body:[
+        {t:"p", v:"Spent today testing myself rather than just reading through new material. Built my own while loops from scratch using self assigned variables, then used += and -= to push the condition toward true or false and watched how the loop behaved each time."},
+        {t:"code", v:"stock = 10\n\nwhile stock > 0:\n    print(\"item shipped, stock left:\", stock)\n    stock -= 1   # deliberately pushing the condition toward False"},
+        {t:"p", v:"It's one thing to be told a while loop runs until its condition is false. It's another to set that condition up yourself, deliberately break it, and see the loop exit exactly where you expected. Doing it hands on instead of following a set exercise is what actually made it click."}
+      ]
+    },
+    {
+      id:"py-79",
+      cat:"py", sub:"Loops",
+      title:"Counter Variables and Fixed-Count Loops",
+      date:"2026-09-07",
+      meta:"Mimo &middot; Day 79",
+      tags:["While Loops","Counters"],
+      excerpt:"Controlling exactly how many times a while loop runs, using a counter that starts at a fixed number rather than a condition tied to something changing dynamically.",
+      body:[
+        {t:"p", v:"Today was about controlling exactly how many times a while loop runs, and using counter variables to do it. Instead of a condition tied to something changing dynamically, you set a counter, usually starting at a fixed number, and have the loop increment or decrement it each time round until it hits your target."},
+        {t:"code", v:"count = 0\nwhile count < 5:\n    print(\"attempt number\", count + 1)\n    count += 1"},
+        {t:"p", v:"The difference that stood out: a counter variable uses a set number you define upfront rather than a value that changes based on outside conditions. Counter based loops show up constantly in practical scripting, think retry attempts capped at a fixed number, or looping through a fixed list of IPs to check."}
+      ]
+    },
+    {
+      id:"py-80",
+      cat:"py", sub:"Loops",
+      title:"For Loops: A Different Way to Repeat",
+      date:"2026-09-08",
+      meta:"Mimo &middot; Day 80",
+      tags:["For Loops","Control Flow"],
+      excerpt:"Where a while loop waits for something to change, a for loop is built to iterate over a known sequence, whether that's a range, a list, or a string.",
+      body:[
+        {t:"p", v:"Today's concept was for loops. Where a while loop keeps going until a condition changes, a for loop is built to iterate over a specific sequence, whether that's a range of numbers, a list, or a string, running once for each item in it and then stopping automatically once it's worked through them all."},
+        {t:"code", v:"ips = [\"10.0.0.1\", \"10.0.0.2\", \"10.0.0.3\"]\n\nfor ip in ips:\n    print(\"checking\", ip)"},
+        {t:"p", v:"What clicked for me is when to reach for which one: a for loop is the right tool when you already know what you're looping over, while a while loop suits situations where you're waiting for something to change. Looping through a list of IPs, usernames, or log entries and running the same check against each one is exactly what a for loop is built for."}
+      ]
+    },
+    {
+      id:"py-81",
+      cat:"py", sub:"Loops",
+      title:"Tracing a For Loop by Hand",
+      date:"2026-09-09",
+      meta:"Mimo &middot; Day 81",
+      tags:["For Loops","Self-Test"],
+      excerpt:"Given a loop, predicting exactly what the variable holds on each pass and what the console will print, before ever running the code.",
+      body:[
+        {t:"p", v:"Today was less about learning something brand new and more about testing myself on for loops. Given a loop, working out what the variable actually holds at each pass and predicting exactly what the console would display before running it."},
+        {t:"code", v:"for i in range(3):\n    print(i * 2)\n\n# predict the output before running: 0, 2, 4"},
+        {t:"p", v:"That prediction step is where the real learning happens. It forces you to trace through the loop line by line rather than just recognising the syntax, tracking how the variable changes on each iteration. Being able to read code and mentally run it before executing is exactly the kind of skill that carries over into reading logs and script output later on."}
+      ]
+    },
+    {
+      id:"py-82",
+      cat:"py", sub:"Lists",
+      title:"Lists: Storing More Than One Value",
+      date:"2026-09-10",
+      meta:"Mimo &middot; Day 82",
+      tags:["Lists","Data Structures"],
+      excerpt:"Creating a list with square brackets and adding as many elements as needed, the first step toward grouping related data instead of juggling separate variables.",
+      body:[
+        {t:"p", v:"Today's concept was lists: creating one using square brackets [] and adding as many elements as needed, whether that's a handful of items or a much longer collection."},
+        {t:"code", v:"flagged_ips = [\"10.0.0.5\", \"10.0.0.9\", \"192.168.1.2\"]\nusernames = [\"admin\", \"dmorgan\", \"guest\"]"},
+        {t:"p", v:"Simple to write, but lists are one of those building blocks that quietly show up everywhere once you start using them. A single variable holds one value, but a list lets you group related data together and work with it as a whole, which opens the door to looping through it, searching it, or updating specific items. A list is exactly how you'd store a set of IP addresses to check or a batch of log entries to process one by one."}
+      ]
+    },
+    {
+      id:"py-83",
+      cat:"py", sub:"Lists",
+      title:"Indexing: Zero, Position, and -1",
+      date:"2026-09-11",
+      meta:"Mimo &middot; Day 83",
+      tags:["Lists","Indexing"],
+      excerpt:"Updating a value at a specific position, and using negative indices to grab the last item in a list without needing to know how long it is.",
+      body:[
+        {t:"p", v:"Today built on lists from the previous lesson. Learned how to update a value at a specific position using its index, and how to pick out exactly the element wanted by referencing that index directly."},
+        {t:"code", v:"logs = [\"login\", \"logout\", \"failed_login\"]\nlogs[0] = \"login_success\"   # update by index\n\nprint(logs[0])    # first item\nprint(logs[-1])   # last item, no need to know the length"},
+        {t:"p", v:"Indexing starts at 0 rather than 1, so the first item in a list is index 0, the second is index 1, and so on upwards. The part that stood out was using negative indices to work backwards: -1 gives you the last item in a list without needing to know how long it is. Being able to grab the most recent item, like the latest log entry or the newest alert, without counting the total length first makes scripts more flexible and less brittle."}
+      ]
+    },
+    {
+      id:"py-84",
+      cat:"py", sub:"Lists",
+      title:"Append, Pop, and Insert",
+      date:"2026-09-12",
+      meta:"Mimo &middot; Day 84",
+      tags:["Lists","Methods"],
+      excerpt:"Three ways to change a list after it exists: adding to the end, pulling an item out and getting it back, and dropping a value into a specific position.",
+      body:[
+        {t:"p", v:"Kept working with lists, this time learning how to actually modify them. Append adds a new item onto the end of the list, pop removes an item (by default the last one, or a specific index if you give it one) and hands it back to you, and insert lets you drop a new value in at a specific position rather than just tacking it on the end."},
+        {t:"code", v:"queue = [\"alert-1\", \"alert-2\"]\nqueue.append(\"alert-3\")        # add to the end\nnext_alert = queue.pop(0)      # remove and return the first item\nqueue.insert(0, \"alert-urgent\")  # insert at a specific position"},
+        {t:"p", v:"The distinction that stood out was append versus insert. Append is the default for adding new data as it comes in, while insert is for when order actually matters and something needs to go in a specific spot rather than the back of the queue. Pop being able to both remove and return a value in one step means you can pull an item out and immediately do something with it, useful for building up a list of flagged events as you process data or working through a queue of items one at a time."}
+      ]
+    },
+    {
+      id:"py-85",
+      cat:"py", sub:"Lists",
+      title:"Testing Myself on Append, Pop, and Insert",
+      date:"2026-09-13",
+      meta:"Mimo &middot; Day 85",
+      tags:["Lists","Self-Test"],
+      excerpt:"Not a fresh lesson this time, but a test on what each list method actually does and why you'd reach for one over the others.",
+      body:[
+        {t:"p", v:"Went back over append, pop and insert today, but this time in test form rather than a fresh lesson. Given each method, working out exactly what it does to a list and why you'd reach for it over the others."},
+        {t:"code", v:"data = [1, 2, 3]\ndata.append(4)     # [1, 2, 3, 4]\ndata.pop()         # removes and returns 4 -> [1, 2, 3]\ndata.insert(1, 9)  # [1, 9, 2, 3]"},
+        {t:"p", v:"That distinction is the real test. Being able to explain the why behind each method, not just recite what it does, is what actually confirms it's sunk in. Revisiting concepts like this under test conditions rather than just reading forward is proving to be a good way to catch the gaps early, before they turn into bad habits further down the line."}
+      ]
+    },
+    {
+      id:"py-86",
+      cat:"py", sub:"Lists",
+      title:"Looping Through a List with For",
+      date:"2026-09-14",
+      meta:"Mimo &middot; Day 86",
+      tags:["Lists","For Loops"],
+      excerpt:"Bringing for loops and lists together: cycling through every item automatically instead of pulling elements out one index at a time.",
+      body:[
+        {t:"p", v:"Brought for loops and lists together today. Learned how to cycle through every item in a list with a for loop, so instead of pulling out one element at a time by its index, the loop automatically walks through the whole thing from start to finish and lets you act on each item as it goes."},
+        {t:"code", v:"usernames = [\"admin\", \"dmorgan\", \"guest\", \"backup\"]\n\nfor user in usernames:\n    print(\"checking account:\", user)"},
+        {t:"p", v:"This is where a lot of the earlier concepts start clicking into place together. Lists give you somewhere to store a group of related data, and for loops give you a clean way to actually process every item in it without writing repetitive code for each one. Looping through a list of usernames or working through a batch of log lines one by one comes down to exactly this same idea: store the data in a list, then loop through it."}
+      ]
+    },
+    {
+      id:"py-87",
+      cat:"py", sub:"Lists",
+      title:"Counting List Items with len()",
+      date:"2026-09-15",
+      meta:"Mimo &middot; Day 87",
+      tags:["Lists","len()"],
+      excerpt:"Using len() to find out how many items are in a list, then feeding that count into an if statement to make a decision based on size rather than contents.",
+      body:[
+        {t:"p", v:"Today's concept was using len() to count how many items are in a list, and using that count inside an if statement to make a decision based on how many elements you're actually working with."},
+        {t:"code", v:"failed_logins = [\"10:01\", \"10:02\", \"10:03\", \"10:04\", \"10:05\"]\n\nif len(failed_logins) >= 5:\n    print(\"threshold hit, raise an alert\")"},
+        {t:"p", v:"Rather than looking at the contents of a list, len() tells you its size, so you can check things like whether a list is empty, whether it's hit a certain number of entries, or whether it's grown past a threshold, and branch your code accordingly. Checking whether a list of failed login attempts has crossed a limit before triggering an alert is exactly this pattern in practice."}
+      ]
+    },
+    {
+      id:"py-88",
+      cat:"py", sub:"Combined Practice",
+      title:"Combined Test: Loops, Lists, and len()",
+      date:"2026-09-16",
+      meta:"Mimo &middot; Day 88",
+      tags:["Self-Test","Loops","Lists"],
+      excerpt:"A checkpoint test pulling lists, for loops, while loops and len() together rather than practising each in isolation, which is where the real gaps show up.",
+      body:[
+        {t:"p", v:"Today was a proper checkpoint: a combined test pulling together everything so far, lists, for loops, while loops and len(), rather than each concept in isolation."},
+        {t:"code", v:"queue = [\"job-1\", \"job-2\", \"job-3\"]\n\nwhile len(queue) > 0:\n    current = queue.pop(0)\n    print(\"processing:\", current)\n\nfor i in range(len(queue) + 3):\n    print(\"pass\", i)"},
+        {t:"p", v:"That combination is really where things get interesting: using len() alongside a while loop to control how many times it runs based on a list's actual size, or looping through a list with a for loop while checking its length to decide when to stop. Seeing how these pieces slot together, rather than just knowing each one on its own, is a good sign the fundamentals are sinking in rather than being memorised individually. It's also a decent way to spot the gaps before moving on to something new."}
+      ]
+    }
+  ];
+
+  var SUBCATS = {
+    all: [],
+    thm: ["Frameworks","Practical Challenges","Phishing Analysis"],
+    py: ["Fundamentals","Loops","Lists","Combined Practice"]
+  };
+  var CAT_LABEL = { all:"All entries", thm:"TryHackMe", py:"Python (Mimo)" };
+
+  var state = { cat:"all", sub:"all", q:"" };
+
+  function fmtDate(iso){
+    var d = new Date(iso + "T00:00:00");
+    return d.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+  }
+
+  function renderStats(){
+    var thmCount = POSTS.filter(function(p){ return p.cat === "thm"; }).length;
+    var pyCount = POSTS.filter(function(p){ return p.cat === "py"; }).length;
+    var html =
+      '<div class="stat"><span class="num">' + POSTS.length + '</span><span class="label">Total entries</span></div>' +
+      '<div class="stat"><span class="num">' + thmCount + '</span><span class="label">TryHackMe rooms</span></div>' +
+      '<div class="stat"><span class="num">' + pyCount + '</span><span class="label">Mimo lessons</span></div>';
+    document.getElementById('statsBlock').innerHTML = html;
+  }
+
+  function renderCatRow(){
+    var cats = ["all","thm","py"];
+    var html = cats.map(function(c){
+      var cls = "chip" + (c !== "all" ? " " + c : "");
+      return '<button class="' + cls + '" data-cat="' + c + '" aria-pressed="' + (state.cat===c) + '">' + CAT_LABEL[c] + '</button>';
+    }).join('');
+    document.getElementById('catRow').innerHTML = html;
+  }
+
+  function renderSubRow(){
+    var subs = SUBCATS[state.cat] || [];
+    var row = document.getElementById('subRow');
+    if(!subs.length){ row.innerHTML = ''; return; }
+    var html = '<button class="chip" data-sub="all" aria-pressed="' + (state.sub==="all") + '">All topics</button>' +
+      subs.map(function(s){
+        return '<button class="chip" data-sub="' + s + '" aria-pressed="' + (state.sub===s) + '">' + s + '</button>';
+      }).join('');
+    row.innerHTML = html;
+  }
+
+  function filtered(){
+    var q = state.q.trim().toLowerCase();
+    return POSTS.filter(function(p){
+      if(state.cat !== "all" && p.cat !== state.cat) return false;
+      if(state.sub !== "all" && p.sub !== state.sub) return false;
+      if(q){
+        var hay = (p.title + " " + p.excerpt + " " + p.tags.join(" ") + " " + p.sub).toLowerCase();
+        if(hay.indexOf(q) === -1) return false;
+      }
+      return true;
+    });
+  }
+
+  function renderGrid(){
+    var list = filtered();
+    var grid = document.getElementById('grid');
+    document.getElementById('countLine').textContent = list.length + (list.length === 1 ? ' entry' : ' entries');
+    if(!list.length){
+      grid.innerHTML = '<div class="empty">No entries match that filter yet.</div>';
+      return;
+    }
+    grid.innerHTML = list.map(function(p){
+      var tagClass = p.cat === "thm" ? "tag thm" : "tag py";
+      var tagLabel = p.cat === "thm" ? "TryHackMe" : "Python";
+      return (
+        '<button class="card" data-id="' + p.id + '">' +
+          '<div class="card-top"><span class="' + tagClass + '">' + tagLabel + '</span><span class="sub">' + p.sub + '</span></div>' +
+          '<h3>' + p.title + '</h3>' +
+          '<div class="excerpt">' + p.excerpt + '</div>' +
+          '<div class="meta">' + fmtDate(p.date) + ' &middot; ' + p.meta.split('&middot;').slice(1).join('&middot;').trim() + '</div>' +
+        '</button>'
+      );
+    }).join('');
+  }
+
+  function openPost(id){
+    var list = filtered();
+    var idx = list.findIndex(function(p){ return p.id === id; });
+    if(idx === -1) return;
+    renderSheet(list, idx);
+    document.getElementById('overlay').hidden = false;
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeOverlay(){
+    document.getElementById('overlay').hidden = true;
+    document.body.style.overflow = '';
+  }
+
+  function renderSheet(list, idx){
+    var p = list[idx];
+    var bodyHtml = p.body.map(function(b){
+      if(b.t === 'code'){
+        return '<pre><code>' + b.v.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</code></pre>';
+      }
+      return '<p>' + b.v + '</p>';
+    }).join('');
+    var tagsHtml = p.tags.map(function(t){ return '<span>' + t + '</span>'; }).join('');
+    var sheet = document.getElementById('sheet');
+    sheet.innerHTML =
+      '<div class="sheet-top">' +
+        '<span class="' + (p.cat==='thm' ? 'tag thm' : 'tag py') + '">' + (p.cat==='thm' ? 'TryHackMe' : 'Python') + ' &middot; ' + p.sub + '</span>' +
+        '<button class="sheet-close" id="sheetClose" aria-label="Close">&times;</button>' +
+      '</div>' +
+      '<h2>' + p.title + '</h2>' +
+      '<div class="meta-line"><span>' + fmtDate(p.date) + '</span><span>' + p.meta + '</span></div>' +
+      '<div class="tags">' + tagsHtml + '</div>' +
+      bodyHtml +
+      '<div class="nav-row">' +
+        '<button id="prevPost"' + (idx===0 ? ' disabled' : '') + '>&larr; Previous</button>' +
+        '<button id="nextPost"' + (idx===list.length-1 ? ' disabled' : '') + '>Next &rarr;</button>' +
+      '</div>';
+    document.getElementById('sheetClose').addEventListener('click', closeOverlay);
+    if(idx > 0){
+      document.getElementById('prevPost').addEventListener('click', function(){ renderSheet(list, idx-1); document.getElementById('sheet').scrollTop = 0; });
+    }
+    if(idx < list.length-1){
+      document.getElementById('nextPost').addEventListener('click', function(){ renderSheet(list, idx+1); document.getElementById('sheet').scrollTop = 0; });
+    }
+  }
+
+  function bindControls(){
+    document.getElementById('catRow').addEventListener('click', function(e){
+      var btn = e.target.closest('[data-cat]');
+      if(!btn) return;
+      state.cat = btn.getAttribute('data-cat');
+      state.sub = "all";
+      renderCatRow(); renderSubRow(); renderGrid();
+    });
+    document.getElementById('subRow').addEventListener('click', function(e){
+      var btn = e.target.closest('[data-sub]');
+      if(!btn) return;
+      state.sub = btn.getAttribute('data-sub');
+      renderSubRow(); renderGrid();
+    });
+    document.getElementById('searchInput').addEventListener('input', function(e){
+      state.q = e.target.value;
+      renderGrid();
+    });
+    document.getElementById('grid').addEventListener('click', function(e){
+      var card = e.target.closest('[data-id]');
+      if(!card) return;
+      openPost(card.getAttribute('data-id'));
+    });
+    document.getElementById('overlay').addEventListener('click', function(e){
+      if(e.target.id === 'overlay') closeOverlay();
+    });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape') closeOverlay();
+    });
+  }
+
+  function bindTheme(){
+    var root = document.documentElement;
+    var btn = document.getElementById('themeToggle');
+    try{
+      var saved = localStorage.getItem('sas-theme');
+      if(saved) root.setAttribute('data-theme', saved);
+    }catch(e){}
+    btn.addEventListener('click', function(){
+      var current = root.getAttribute('data-theme');
+      var next = current === 'dark' ? 'light' : (current === 'light' ? null : 'dark');
+      if(next){ root.setAttribute('data-theme', next); } else { root.removeAttribute('data-theme'); }
+      try{ localStorage.setItem('sas-theme', next || ''); }catch(e){}
+    });
+  }
+
+  renderStats();
+  renderCatRow();
+  renderSubRow();
+  renderGrid();
+  bindControls();
+  bindTheme();
+
+})();
+</script>
