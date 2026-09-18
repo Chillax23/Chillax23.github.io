@@ -71,6 +71,8 @@
     font-variant-numeric: tabular-nums;
   }
 
+  .icon{ width:15px; height:15px; flex:none; vertical-align:-2px; }
+
   /* ---------- Header ---------- */
   header.site{
     padding-block: 40px 28px;
@@ -149,6 +151,7 @@
   .cat-row{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
   .sub-row{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
   .chip{
+    display:inline-flex; align-items:center; gap:6px;
     border:1px solid var(--border);
     background:var(--surface);
     color:var(--ink-soft);
@@ -199,6 +202,7 @@
   .card:hover{ border-color: var(--ink-faint); }
   .card-top{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
   .tag{
+    display:inline-flex; align-items:center; gap:5px;
     font-size:.68rem;
     text-transform:uppercase;
     letter-spacing:.06em;
@@ -208,7 +212,7 @@
   }
   .tag.thm{ background:var(--accent-thm-soft); color:var(--accent-thm); }
   .tag.py{ background:var(--accent-py-soft); color:var(--accent-py); }
-  .card .sub{ font-size:.72rem; color:var(--ink-faint); }
+  .card .sub{ display:inline-flex; align-items:center; gap:5px; font-size:.72rem; color:var(--ink-faint); }
   .card h3{
     font-family:'Fraunces', Georgia, serif;
     font-weight:600;
@@ -220,6 +224,19 @@
   .card .excerpt{ color:var(--ink-soft); font-size:.9rem; flex:1; }
   .card .meta{ font-size:.72rem; color:var(--ink-faint); border-top:1px dashed var(--border); padding-top:10px; }
   .empty{ color:var(--ink-faint); padding:40px 0; text-align:center; }
+
+  /* ---------- Diagrams ---------- */
+  figure.dg{
+    margin:18px 0 6px;
+    padding:16px;
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:12px;
+    overflow-x:auto;
+    color:var(--ink-soft);
+  }
+  figure.dg svg{ display:block; width:100%; height:auto; min-width:520px; }
+  figure.dg figcaption{ margin-top:10px; font-size:.78rem; line-height:1.45; color:var(--ink-faint); }
 
   /* ---------- Overlay ---------- */
   .overlay{
@@ -338,6 +355,176 @@
 <script>
 (function(){
 
+  var ICONS = {
+    all: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
+    thm: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 L20 6 V11 C20 16.5 16.5 20.5 12 22 C7.5 20.5 4 16.5 4 11 V6 Z"/><path d="M8.5 12 L11 14.5 L16 9"/></svg>',
+    py: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6 L4 12 L9 18"/><path d="M15 6 L20 12 L15 18"/></svg>',
+    "Frameworks": '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 L21 20 H3 Z"/><path d="M7.3 14 H16.7"/></svg>',
+    "Practical Challenges": '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/></svg>',
+    "Phishing Analysis": '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="16" height="12" rx="1.5"/><path d="M3 7.5 L11 13 L19 7.5"/><path d="M19 6 q4 0 3.5 4 q-0.5 3 -3 2.5"/></svg>',
+    "Fundamentals": '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M6 10 L9.5 12.5 L6 15"/><line x1="11.5" y1="15" x2="16" y2="15"/></svg>',
+    "Loops": '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12a8 8 0 0 1 14-5.3"/><path d="M18 3v4h-4"/><path d="M20 12a8 8 0 0 1-14 5.3"/><path d="M6 21v-4h4"/></svg>',
+    "Lists": '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="4.5" cy="6" r="1.3"/><line x1="8" y1="6" x2="21" y2="6"/><circle cx="4.5" cy="12" r="1.3"/><line x1="8" y1="12" x2="21" y2="12"/><circle cx="4.5" cy="18" r="1.3"/><line x1="8" y1="18" x2="21" y2="18"/></svg>',
+    "Functions & I/O": '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h11"/><path d="M11 7l5 5-5 5"/><path d="M18 5v14"/></svg>',
+    "Combined Practice": '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M6.5 8 L8.5 10 L12.5 6"/><line x1="6" y1="14" x2="18" y2="14"/><line x1="6" y1="17.5" x2="14" y2="17.5"/></svg>'
+  };
+
+  var DG_PYRAMID = '<figure class="dg"><svg viewBox="0 0 760 300" role="img" aria-label="The seven tiers of the Pyramid of Pain, from hash values at the base to TTPs at the apex, with the cost to the attacker increasing at each level."><defs><marker id="ar-pyr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 Z" fill="currentColor"/></marker></defs><g>' +
+    '<polygon points="10,240 350,240 328.6,208.6 31.4,208.6" style="fill:var(--accent-thm);opacity:.12"/>' +
+    '<polygon points="31.4,208.6 328.6,208.6 307.1,177.1 52.9,177.1" style="fill:var(--accent-thm);opacity:.22"/>' +
+    '<polygon points="52.9,177.1 307.1,177.1 285.7,145.7 74.3,145.7" style="fill:var(--accent-thm);opacity:.34"/>' +
+    '<polygon points="74.3,145.7 285.7,145.7 264.3,114.3 95.7,114.3" style="fill:var(--accent-thm);opacity:.46"/>' +
+    '<polygon points="95.7,114.3 264.3,114.3 242.9,82.9 117.1,82.9" style="fill:var(--accent-thm);opacity:.6"/>' +
+    '<polygon points="117.1,82.9 242.9,82.9 221.4,51.4 138.6,51.4" style="fill:var(--accent-thm);opacity:.76"/>' +
+    '<polygon points="138.6,51.4 221.4,51.4 180,20" style="fill:var(--accent-thm);opacity:.95"/>' +
+    '<g stroke="currentColor" stroke-width="1" opacity=".5">' +
+    '<line x1="339" y1="224" x2="360" y2="224"/><line x1="318" y1="193" x2="360" y2="193"/><line x1="296" y1="161" x2="360" y2="161"/>' +
+    '<line x1="275" y1="130" x2="360" y2="130"/><line x1="254" y1="99" x2="360" y2="99"/><line x1="232" y1="67" x2="360" y2="67"/><line x1="211" y1="36" x2="360" y2="36"/>' +
+    '</g>' +
+    '<g font-size="12" fill="currentColor">' +
+    '<text x="366" y="228">Hash values</text><text x="366" y="197">IP addresses</text><text x="366" y="165">Domain names</text>' +
+    '<text x="366" y="134">Host artifacts</text><text x="366" y="103">Network artifacts</text><text x="366" y="71">Tools</text>' +
+    '<text x="366" y="40" style="fill:var(--accent-thm);font-weight:600">TTPs</text>' +
+    '</g>' +
+    '<line x1="560" y1="248" x2="560" y2="28" stroke="currentColor" stroke-width="1.6" marker-end="url(#ar-pyr)"/>' +
+    '<text x="568" y="245" font-size="10.5" fill="currentColor">cheap, fast to change</text>' +
+    '<text x="568" y="34" font-size="10.5" fill="currentColor">forces a full retool</text>' +
+    '</g></svg><figcaption>The seven tiers of the Pyramid of Pain. The higher the indicator you can detect, the more it costs an attacker to work around it.</figcaption></figure>';
+
+  var DG_CKC = '<figure class="dg"><svg viewBox="0 0 780 190" role="img" aria-label="The Cyber Kill Chain drawn as seven linked stages, with the chain broken between delivery and exploitation to show that stopping one link stops the whole attack."><defs><marker id="ar-ckc" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 Z" fill="currentColor"/></marker></defs>' +
+    '<g stroke="currentColor" fill="none" stroke-width="1.4">' +
+    '<rect x="20" y="50" width="92" height="54" rx="6"/><rect x="128" y="50" width="92" height="54" rx="6"/><rect x="236" y="50" width="92" height="54" rx="6"/>' +
+    '<rect x="452" y="50" width="92" height="54" rx="6" style="stroke:var(--accent-thm)"/><rect x="560" y="50" width="92" height="54" rx="6"/><rect x="668" y="50" width="92" height="54" rx="6"/>' +
+    '</g>' +
+    '<rect x="344" y="50" width="92" height="54" rx="6" fill="none" stroke="currentColor" stroke-width="1.4"/>' +
+    '<g font-size="11.5" fill="currentColor" text-anchor="middle">' +
+    '<text x="66" y="81">Recon</text><text x="174" y="81">Weaponize</text><text x="282" y="81">Deliver</text><text x="390" y="81">Exploit</text>' +
+    '<text x="498" y="81" style="fill:var(--accent-thm)">Install</text><text x="606" y="81">C2</text><text x="714" y="81">Actions</text>' +
+    '</g>' +
+    '<g stroke="currentColor" stroke-width="1.4" marker-end="url(#ar-ckc)">' +
+    '<line x1="112" y1="77" x2="126" y2="77"/><line x1="220" y1="77" x2="234" y2="77"/>' +
+    '</g>' +
+    '<line x1="328" y1="77" x2="342" y2="77" stroke="currentColor" stroke-width="1.4" stroke-dasharray="2 3"/>' +
+    '<g stroke="var(--accent-thm)" stroke-width="2"><line x1="330" y1="70" x2="340" y2="84"/><line x1="340" y1="70" x2="330" y2="84"/></g>' +
+    '<g stroke="currentColor" stroke-width="1.4" marker-end="url(#ar-ckc)">' +
+    '<line x1="436" y1="77" x2="450" y2="77"/><line x1="544" y1="77" x2="558" y2="77"/><line x1="652" y1="77" x2="666" y2="77"/>' +
+    '</g>' +
+    '<text x="335" y="130" font-size="11" fill="var(--accent-thm)" text-anchor="middle">block one link here</text>' +
+    '<text x="335" y="144" font-size="11" fill="var(--accent-thm)" text-anchor="middle">and the chain never completes</text>' +
+    '</svg><figcaption>The Cyber Kill Chain: an attacker must complete all seven stages in order. A defender only has to break one.</figcaption></figure>';
+
+  var DG_UKC = '<figure class="dg"><svg viewBox="0 0 780 260" role="img" aria-label="The Unified Kill Chain grouped into three goals: In, Through, and Out, each expanding into several of its eighteen phases."><defs><marker id="ar-ukc" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 Z" fill="var(--accent-thm)"/></marker></defs>' +
+    '<g fill="none" stroke="currentColor" stroke-width="1.4">' +
+    '<rect x="20" y="30" width="230" height="210" rx="10"/><rect x="290" y="30" width="230" height="210" rx="10"/><rect x="560" y="30" width="230" height="210" rx="10"/>' +
+    '</g>' +
+    '<g font-family="IBM Plex Mono, monospace" font-size="13" font-weight="600" fill="currentColor" text-anchor="middle">' +
+    '<text x="135" y="55">IN</text><text x="405" y="55">THROUGH</text><text x="675" y="55">OUT</text>' +
+    '</g>' +
+    '<g font-size="11" fill="currentColor">' +
+    '<rect x="40" y="72" width="190" height="26" rx="13" fill="none" stroke="currentColor" opacity=".6"/><text x="135" y="89" text-anchor="middle">Recon</text>' +
+    '<rect x="40" y="106" width="190" height="26" rx="13" fill="none" stroke="currentColor" opacity=".6"/><text x="135" y="123" text-anchor="middle">Social eng. + exploit</text>' +
+    '<rect x="40" y="140" width="190" height="26" rx="13" fill="none" stroke="currentColor" opacity=".6"/><text x="135" y="157" text-anchor="middle">Persistence</text>' +
+    '<rect x="310" y="72" width="190" height="26" rx="13" fill="none" stroke="currentColor" opacity=".6"/><text x="405" y="89" text-anchor="middle">Pivot + discovery</text>' +
+    '<rect x="310" y="106" width="190" height="26" rx="13" fill="none" stroke="currentColor" opacity=".6"/><text x="405" y="123" text-anchor="middle">Privilege escalation</text>' +
+    '<rect x="310" y="140" width="190" height="26" rx="13" fill="none" stroke="currentColor" opacity=".6"/><text x="405" y="157" text-anchor="middle">Lateral movement</text>' +
+    '<rect x="580" y="72" width="190" height="26" rx="13" fill="none" stroke="currentColor" opacity=".6"/><text x="675" y="89" text-anchor="middle">Collection</text>' +
+    '<rect x="580" y="106" width="190" height="26" rx="13" fill="none" stroke="currentColor" opacity=".6"/><text x="675" y="123" text-anchor="middle">Exfiltration</text>' +
+    '<rect x="580" y="140" width="190" height="26" rx="13" fill="none" stroke="currentColor" opacity=".6"/><text x="675" y="157" text-anchor="middle">Impact</text>' +
+    '</g>' +
+    '<g stroke="var(--accent-thm)" stroke-width="2" marker-end="url(#ar-ukc)"><line x1="252" y1="135" x2="288" y2="135"/><line x1="522" y1="135" x2="558" y2="135"/></g>' +
+    '</svg><figcaption>The Unified Kill Chain groups its eighteen phases into three goals, In, Through and Out, each a sequence in its own right.</figcaption></figure>';
+
+  var DG_MITRE = '<figure class="dg"><svg viewBox="0 0 780 170" role="img" aria-label="A pipeline showing how one observed attacker technique flows through MITRE ATT&amp;CK, CAR and D3FEND: ATT&amp;CK names it, CAR turns it into a detection query, and D3FEND supplies the defensive control."><defs><marker id="ar-mit" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 Z" fill="currentColor"/></marker></defs>' +
+    '<rect x="20" y="40" width="160" height="76" rx="8" fill="none" stroke="currentColor" stroke-width="1.4"/>' +
+    '<rect x="220" y="40" width="160" height="76" rx="8" style="fill:var(--accent-thm-soft);stroke:var(--accent-thm)" stroke-width="1.6"/>' +
+    '<rect x="420" y="40" width="160" height="76" rx="8" fill="none" stroke="currentColor" stroke-width="1.4"/>' +
+    '<rect x="620" y="40" width="160" height="76" rx="8" fill="none" stroke="currentColor" stroke-width="1.4"/>' +
+    '<g text-anchor="middle" font-size="12.5" fill="currentColor">' +
+    '<text x="100" y="72">Attacker</text><text x="100" y="88">technique</text>' +
+    '<text x="300" y="72" style="fill:var(--accent-thm);font-weight:600">ATT&amp;CK</text><text x="300" y="88">names it, gives it an ID</text>' +
+    '<text x="500" y="72">CAR</text><text x="500" y="88">detection query</text>' +
+    '<text x="700" y="72">D3FEND</text><text x="700" y="88">defensive control</text>' +
+    '</g>' +
+    '<g stroke="currentColor" stroke-width="1.4" marker-end="url(#ar-mit)">' +
+    '<line x1="180" y1="78" x2="218" y2="78"/><line x1="380" y1="78" x2="418" y2="78"/><line x1="580" y1="78" x2="618" y2="78"/>' +
+    '</g>' +
+    '<g font-size="10" fill="currentColor" text-anchor="middle">' +
+    '<text x="199" y="65">observed as</text><text x="399" y="65">operationalised by</text><text x="599" y="65">paired with</text>' +
+    '</g>' +
+    '</svg><figcaption>How one observed attacker action moves through MITRE&#39;s resources: ATT&amp;CK gives it a shared name, CAR turns that into something you can detect, D3FEND supplies the countermeasure.</figcaption></figure>';
+
+  var DG_SUMMIT = '<figure class="dg"><svg viewBox="0 0 780 260" role="img" aria-label="A staircase of six detections climbing the Pyramid of Pain, from an MD5 hash match at the bottom to a Sigma rule for file modification at the top, ending with the simulated adversary giving up."><defs><marker id="ar-sum" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 Z" fill="var(--accent-thm)"/></marker></defs>' +
+    '<polyline points="20,220 120,220 120,192 220,192 220,164 320,164 320,136 420,136 420,108 520,108 520,80 620,80" fill="none" stroke="currentColor" stroke-width="1.8"/>' +
+    '<line x1="620" y1="80" x2="700" y2="40" stroke="var(--accent-thm)" stroke-width="1.8" marker-end="url(#ar-sum)"/>' +
+    '<text x="700" y="30" font-size="11.5" fill="var(--accent-thm)" font-weight="600" text-anchor="middle">adversary gives up</text>' +
+    '<g font-size="10.5" fill="currentColor" text-anchor="middle">' +
+    '<text x="70" y="212">MD5 hash match</text>' +
+    '<text x="170" y="184">Block the IP</text>' +
+    '<text x="270" y="156">DNS filter the domain</text>' +
+    '<text x="370" y="128">Sigma: registry change</text>' +
+    '<text x="470" y="100">Sigma: beacon every 30m</text>' +
+    '<text x="570" y="72">Sigma: file modification</text>' +
+    '</g>' +
+    '</svg><figcaption>Climbing the Pyramid of Pain one detection at a time: six flags, six rising costs, until the simulated adversary has nowhere left to go.</figcaption></figure>';
+
+  var DG_APT28 = '<figure class="dg"><svg viewBox="0 0 900 170" role="img" aria-label="APT28's technique chain traced from spearphishing through to proxy-based exfiltration, with SharePoint marked as the group's actual target."><defs><marker id="ar-apt" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 Z" fill="currentColor"/></marker></defs>' +
+    '<g fill="none" stroke="currentColor" stroke-width="1.4">' +
+    '<rect x="15" y="45" width="95" height="54" rx="6"/><rect x="125" y="45" width="95" height="54" rx="6"/><rect x="235" y="45" width="95" height="54" rx="6"/><rect x="345" y="45" width="95" height="54" rx="6"/>' +
+    '<rect x="455" y="45" width="95" height="54" rx="6"/><rect x="565" y="45" width="95" height="54" rx="6"/><rect x="675" y="45" width="95" height="54" rx="6" style="stroke:var(--accent-thm)"/><rect x="785" y="45" width="95" height="54" rx="6"/>' +
+    '</g>' +
+    '<g font-size="10.5" fill="currentColor" text-anchor="middle">' +
+    '<text x="62" y="76">Spearphish</text><text x="172" y="76">Email accts</text><text x="282" y="76">Malic. file</text><text x="392" y="76">PS / CMD</text>' +
+    '<text x="502" y="76">Registry keys</text><text x="612" y="76">Rundll32</text><text x="722" y="76" style="fill:var(--accent-thm)">SMB shares</text><text x="832" y="76">Proxy exfil</text>' +
+    '</g>' +
+    '<g stroke="currentColor" stroke-width="1.4" marker-end="url(#ar-apt)">' +
+    '<line x1="110" y1="72" x2="123" y2="72"/><line x1="220" y1="72" x2="233" y2="72"/><line x1="330" y1="72" x2="343" y2="72"/><line x1="440" y1="72" x2="453" y2="72"/>' +
+    '<line x1="550" y1="72" x2="563" y2="72"/><line x1="660" y1="72" x2="673" y2="72"/><line x1="770" y1="72" x2="783" y2="72"/>' +
+    '</g>' +
+    '<line x1="722" y1="99" x2="722" y2="130" stroke="var(--accent-thm)" stroke-width="1.4" marker-end="url(#ar-apt)" style="marker-end:none"/>' +
+    '<text x="722" y="148" font-size="10.5" fill="var(--accent-thm)" text-anchor="middle">target: SharePoint (IP theft)</text>' +
+    '</svg><figcaption>APT28&#39;s technique chain traced end to end: initial access by spearphishing, persistence through registry run keys, and exfiltration over a multi-hop proxy if the usual channel gets blocked.</figcaption></figure>';
+
+  var DG_EMAILFLOW = '<figure class="dg"><svg viewBox="0 0 780 220" role="img" aria-label="An email's path from the sender's client through SMTP and a DNS lookup to the recipient's mail server, then POP3 or IMAP to the recipient's device."><defs><marker id="ar-flo" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 Z" fill="currentColor"/></marker></defs>' +
+    '<g fill="none" stroke="currentColor" stroke-width="1.4">' +
+    '<rect x="20" y="40" width="150" height="50" rx="7"/><rect x="230" y="40" width="150" height="50" rx="7"/><rect x="440" y="40" width="150" height="50" rx="7"/><rect x="630" y="40" width="130" height="50" rx="7"/>' +
+    '</g>' +
+    '<rect x="300" y="150" width="180" height="42" rx="7" style="fill:var(--accent-thm-soft);stroke:var(--accent-thm)" stroke-width="1.4"/>' +
+    '<g font-size="11" fill="currentColor" text-anchor="middle">' +
+    '<text x="95" y="69">Sender&#39;s client</text><text x="305" y="69">Sender mail server</text><text x="515" y="69">Recipient mail server</text><text x="695" y="69">Recipient device</text>' +
+    '<text x="390" y="175" style="fill:var(--accent-thm)">DNS: finds the mail server</text>' +
+    '</g>' +
+    '<g stroke="currentColor" stroke-width="1.4" marker-end="url(#ar-flo)">' +
+    '<line x1="170" y1="65" x2="228" y2="65"/><line x1="380" y1="65" x2="438" y2="65"/><line x1="590" y1="65" x2="628" y2="65"/>' +
+    '</g>' +
+    '<g stroke="var(--accent-thm)" stroke-width="1.2" stroke-dasharray="3 3">' +
+    '<line x1="315" y1="90" x2="355" y2="150"/><line x1="465" y1="150" x2="500" y2="90" marker-end="url(#ar-flo)"/>' +
+    '</g>' +
+    '<g font-size="10" fill="currentColor" text-anchor="middle">' +
+    '<text x="220" y="35">SMTP</text><text x="410" y="35">SMTP, over the internet</text><text x="610" y="35">POP3 or IMAP</text>' +
+    '</g>' +
+    '</svg><figcaption>An email&#39;s path from sender to recipient: SMTP hands it off, DNS finds the destination mail server, and POP3 or IMAP finally brings it to the recipient&#39;s device.</figcaption></figure>';
+
+  var DG_REDIRECT = '<figure class="dg"><svg viewBox="0 0 780 220" role="img" aria-label="A phishing redirect chain from an email link through fake OneDrive and Adobe pages to a fake login portal that sends the entered credentials to the attacker's own server, not to Outlook."><defs><marker id="ar-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 Z" fill="currentColor"/></marker></defs>' +
+    '<g fill="none" stroke="currentColor" stroke-width="1.4">' +
+    '<rect x="20" y="40" width="150" height="50" rx="7"/><rect x="190" y="40" width="150" height="50" rx="7"/><rect x="360" y="40" width="150" height="50" rx="7"/>' +
+    '</g>' +
+    '<rect x="530" y="40" width="150" height="50" rx="7" style="stroke:var(--accent-thm)" stroke-width="1.6"/>' +
+    '<rect x="500" y="150" width="210" height="46" rx="7" style="fill:var(--accent-thm);opacity:.9"/>' +
+    '<g font-size="11" fill="currentColor" text-anchor="middle">' +
+    '<text x="95" y="62">Phishing</text><text x="95" y="76">email link</text>' +
+    '<text x="265" y="62">Fake</text><text x="265" y="76">OneDrive page</text>' +
+    '<text x="435" y="62">Fake</text><text x="435" y="76">Adobe page</text>' +
+    '<text x="605" y="62" style="fill:var(--accent-thm)">Fake login</text><text x="605" y="76" style="fill:var(--accent-thm)">portal</text>' +
+    '</g>' +
+    '<text x="605" y="177" font-size="11" fill="var(--accent-ink)" text-anchor="middle" font-weight="600">Attacker&#39;s server</text>' +
+    '<g stroke="currentColor" stroke-width="1.4" marker-end="url(#ar-red)">' +
+    '<line x1="170" y1="65" x2="188" y2="65"/><line x1="340" y1="65" x2="358" y2="65"/><line x1="510" y1="65" x2="528" y2="65"/>' +
+    '</g>' +
+    '<line x1="605" y1="90" x2="605" y2="148" stroke="var(--accent-thm)" stroke-width="1.6" marker-end="url(#ar-red)"/>' +
+    '<text x="620" y="118" font-size="10" fill="var(--accent-thm)">credentials sent here,</text>' +
+    '<text x="620" y="130" font-size="10" fill="var(--accent-thm)">not to Outlook</text>' +
+    '</svg><figcaption>Each redirect borrows a little more trust from a real brand until the final page, styled as an Outlook login, sends whatever you type straight to the attacker&#39;s own server.</figcaption></figure>';
+
   var POSTS = [
 
     /* ===================== TRYHACKME ===================== */
@@ -351,6 +538,7 @@
       excerpt:"A framework for ranking indicators of compromise by how much it actually costs an attacker when you act on them, from a throwaway hash value up to their tactics, techniques and procedures.",
       body:[
         {t:"p", v:"The Pyramid of Pain ranks the indicators you use to detect an attacker by how much pain it causes them when you act on it. It isn't a detection tool by itself, it's a way of thinking about which indicators are actually worth your time."},
+        {t:"diagram", v: DG_PYRAMID},
         {t:"p", v:"At the bottom sit hash values and IP addresses, trivial and easy for an attacker to change. Append one byte to a file and its hash is completely different. Rotate an IP and the block is worthless within minutes. Move up through domain names, host artifacts and network artifacts and it gets progressively more annoying for an attacker to adapt around, since domains cost money and time to register and abandon."},
         {t:"p", v:"At the very top sit TTPs, tactics, techniques and procedures. Detect those and an attacker essentially has to retrain and rebuild their entire approach. The lightbulb moment for me was realising why chasing hashes and IPs alone only gets a defender so far: real detection value comes from understanding attacker behaviour itself, which is a lot harder to fake your way around than a file signature."},
         {t:"p", v:"Worked through hash analysis using VirusTotal style lookups, IP and domain based indicators including a punycode attack example (a domain using look-alike Unicode characters to imitate a trusted one), host and network artifacts such as suspicious process execution and unusual User-Agent strings, and finished with a practical exercise mapping real indicators onto the correct tier of the pyramid myself."}
@@ -366,6 +554,7 @@
       excerpt:"Lockheed Martin's framework for how an attack actually unfolds, from reconnaissance through to the attacker's final objective, and why a defender only needs to win at one stage.",
       body:[
         {t:"p", v:"The Cyber Kill Chain breaks a cyber attack into seven distinct stages: reconnaissance, weaponization, delivery, exploitation, installation, command and control, and finally actions on objectives. The core idea is simple but powerful. An attacker has to succeed at every single stage to reach their goal, which means a defender only needs to break the chain at one point to stop the whole attack."},
+        {t:"diagram", v: DG_CKC},
         {t:"p", v:"Walked through each phase in detail: reconnaissance and OSINT gathering (email harvesting, WHOIS lookups), weaponization of payloads, delivery methods like phishing emails and watering hole attacks, exploitation of known and zero-day vulnerabilities, installation techniques such as persistent backdoors and timestomping to alter file timestamps and evade forensic review, command and control channels including DNS tunneling, and finally exfiltration and actions on objectives."},
         {t:"p", v:"The practical section was the strongest part of the room. Used the real world Target data breach from 2013 as a case study and mapped the actual attack techniques, things like exploiting a public-facing application and abusing PowerShell for lateral movement, onto the correct Kill Chain stage myself, rather than just reading about the theory secondhand."},
         {t:"p", v:"Also picked up an important limitation of the model. The traditional Kill Chain focuses heavily on malware delivery and perimeter defence, so it doesn't account well for insider threats, which is exactly why newer frameworks like MITRE ATT&CK are usually used alongside it rather than as a replacement."}
@@ -381,6 +570,7 @@
       excerpt:"Paul Pols' 2017 extension of the traditional Kill Chain, grouping 18 phases of an attack into three goals: getting In, moving Through a network, and getting Out with the objective achieved.",
       body:[
         {t:"p", v:"Following on from the traditional Cyber Kill Chain, this room covers Paul Pols' Unified Kill Chain, published in 2017 to complement frameworks like Lockheed Martin's and MITRE ATT&CK rather than replace them. Where the traditional model has 7 stages, the UKC breaks an attack down into 18 phases, grouped into three overall goals: getting In, moving Through the network, and getting Out with the objective achieved."},
+        {t:"diagram", v: DG_UKC},
         {t:"p", v:"The In phase covers reconnaissance, weaponization, social engineering, exploitation, persistence, defence evasion and command and control. The Through phase is where an attacker pivots deeper into a network, escalates privileges, steals credentials and moves laterally between systems. The Out phase covers collection, exfiltration and impact, essentially where the attacker finally hits confidentiality, integrity or availability, known as the CIA triad."},
         {t:"p", v:"What stood out most was working through scenario based questions rather than plain definitions: spotting failed admin logins as a privilege escalation attempt, or recognising Mimikatz activity on a workstation as credential access. Mapping real behaviour to the right phase felt a lot closer to actual analyst work than memorising a list of terms."},
         {t:"p", v:"Finished with a practical matching real attacker actions to the correct UKC phase to reveal a flag. A clearer picture came out of this room of how these various kill chain models build on each other rather than compete for attention."}
@@ -396,6 +586,7 @@
       excerpt:"How ATT&CK gives defenders a shared language for adversary behaviour, how CAR turns that into ready-made detections, and how D3FEND flips the whole picture to focus on the defensive side.",
       body:[
         {t:"p", v:"This room goes deep on the ecosystem MITRE has built around understanding and stopping attackers. Started with the ATT&CK framework itself, a globally used knowledge base of tactics, techniques and procedures based on real world observed adversary behaviour, and worked through the matrix structure of tactics, techniques and sub-techniques using the ATT&CK Navigator."},
+        {t:"diagram", v: DG_MITRE},
         {t:"p", v:"The threat intelligence side felt most relevant to real analyst work. Took on the role of an analyst in the aviation sector and used ATT&CK to research an APT group known to target that industry, tracing their specific techniques and identifying gaps in defensive coverage rather than just reading definitions off a page."},
         {t:"p", v:"Also worked through the Cyber Analytics Repository, which turns ATT&CK techniques into ready made detection logic with example queries for tools like Splunk, and D3FEND, which flips the perspective entirely by mapping out defensive techniques and countermeasures rather than attacker behaviour. Finished by looking at some of MITRE's newer frameworks, including ATLAS for threats against AI and machine learning systems."},
         {t:"p", v:"The biggest takeaway was how these three pieces fit together: ATT&CK gives you a shared language for describing what happened, CAR turns that into something you can actually detect, and D3FEND tells you how to defend against it. Three angles on the same underlying problem."}
@@ -411,6 +602,7 @@
       excerpt:"A scenario exercise mapping a real APT group's known techniques onto a full attack chain, from spearphishing links for initial access through to exfiltration over a multi-hop proxy.",
       body:[
         {t:"p", v:"A scenario based exercise using the MITRE ATT&CK Navigator to track an APT group, APT28, through a full attack chain against a fictional company. The setup: a security analyst receives intelligence that this group might be targeting the organisation, and has to map out exactly which techniques it's known to use at each stage, then apply that to real indicators showing up on the network."},
+        {t:"diagram", v: DG_APT28},
         {t:"p", v:"Traced the attack from spearphishing links for initial access and reconnaissance, through targeting email accounts to build out resources, malicious files and links for execution, and PowerShell and Windows Command Shell as the scripting interpreters behind that execution. Then into persistence via registry run keys, defence evasion through rundll32 being abused for proxy execution, and network sniffing for discovery once inside."},
         {t:"p", v:"Moved into lateral movement via SMB and Windows admin shares, identified SharePoint as the likely target for data theft given the company's intellectual property was the actual objective, and finished by working out how the group might use external and multi-hop proxies to exfiltrate data if its usual command and control channel got blocked."},
         {t:"p", v:"Going technique by technique through a full chain like this, rather than looking at each one in isolation, builds a much better sense of pattern recognition than reading a group's profile page top to bottom ever does."}
@@ -426,6 +618,7 @@
       excerpt:"A hands-on purple team challenge: detect and block five malware samples one Pyramid of Pain tier at a time, writing real Sigma rules along the way, until the adversary finally gives up.",
       body:[
         {t:"p", v:"This was a hands on purple team challenge built directly on the Pyramid of Pain concept, and easily one of the most practical rooms so far. The scenario: a simulated adversary keeps executing malware samples on a workstation, and the job is to detect and block them at every level of the pyramid, forcing the attacker to work harder and harder until they finally give up."},
+        {t:"diagram", v: DG_SUMMIT},
         {t:"p", v:"Started at the bottom with hash values, checking an MD5 hash of sample1.exe against a threat database. Moved up to IP addresses, blocking the malicious IP on the firewall in both directions. Then domain names, tracing the IP back to its domain and setting a DNS filter to deny it outright."},
         {t:"p", v:"From there it got more interesting. Wrote a Sigma rule to catch a Sysmon event for a registry modification that disabled real-time protection, then another Sigma rule to detect a network connection with a specific packet size beaconing out every 30 minutes, a classic command and control pattern. Finished by digging through the commands the attacker had actually run on the device, tracking down the file they were trying to access, and writing a final Sigma rule to catch that exact file modification attempt."},
         {t:"p", v:"Going from reading about the Pyramid of Pain in theory to actually writing detection rules that climb it step by step made the whole concept click in a way the reading alone hadn't. Real detection engineering, not just definitions."}
@@ -441,9 +634,26 @@
       excerpt:"From the structure of an email address up to defanging a malicious URL: header analysis, decoding a base64 attachment, and spotting a spoofed sender in a real phishing sample.",
       body:[
         {t:"p", v:"This room walks through email from the ground up, starting with something as basic as the structure of an email address, then moving into the actual delivery mechanics: SMTP for sending, and POP3 versus IMAP for how a mailbox retrieves and syncs messages across devices."},
+        {t:"diagram", v: DG_EMAILFLOW},
         {t:"p", v:"The real value was in the hands on analysis. Opened raw .eml files in Thunderbird and viewed the message source to pull out header details like the X-Originating-IP, well beyond what the standard inbox view shows. Also worked through an email with a base64 encoded PDF attachment, decoding it with CyberChef to reveal a hidden flag embedded inside."},
         {t:"p", v:"Then moved into how attackers actually abuse all of this: spoofed sender addresses, urgency in the subject line, brand impersonation, hidden or shortened links, and disguised attachments like invoice.pdf.exe. Practised defanging suspicious URLs and IPs, replacing characters like the dot and the @ symbol so they're safe to document without risk of an accidental click, and analysed a real phishing sample to identify the spoofed organisation, the actual sending address, and which mail server generated the Authentication-Results header."},
         {t:"p", v:"Email is still one of the most common ways into an organisation, so being able to actually read the technical evidence behind a suspicious message, rather than just eyeballing it, feels like a genuinely useful skill to have locked in early."}
+      ]
+    },
+    {
+      id:"thm-phishing2",
+      cat:"thm", sub:"Phishing Analysis",
+      title:"Six Real Phishing Emails, Six Different Traps",
+      date:"2026-09-18",
+      meta:"TryHackMe &middot; Phishing Emails in Action &middot; 675-day streak &middot; 56 pts",
+      tags:["Phishing","Credential Harvesting","Malware"],
+      excerpt:"A multi-stage redirect chain that launders trust through OneDrive and Adobe before landing on a fake login page, plus five other real phishing samples each using a different trick.",
+      body:[
+        {t:"p", v:"This is the second room in the Phishing Analysis module, and it's a big step up from the first: six real phishing samples, each using a different combination of tactics, analysed end to end."},
+        {t:"p", v:"Started with a fake PayPal order cancellation using a spoofed sender and a shortened URL to hide the real destination, unpacked with a tool called WhereGoes rather than clicking it directly. Moved through a fake shipping notification carrying an embedded tracking pixel, which is exactly why email providers like Yahoo automatically block images in suspicious messages. Then a multi stage redirect chain impersonating OneDrive and Adobe that funnelled all the way down to a fake login portal designed purely to harvest credentials, regardless of what was actually typed in."},
+        {t:"diagram", v: DG_REDIRECT},
+        {t:"p", v:"The remaining three brought attachments into the mix. A fake Netflix billing notice hiding its real link inside a PDF, an Apple Support email that BCC'd its victims and buried a malicious redirect inside a .dot file, and a DHL shipping notice with a rigged Excel attachment that tried to execute a payload called regasms.exe the moment its embedded link was clicked, with red flags like a German sender domain, an Indian invoice address and Mandarin document content all contradicting each other."},
+        {t:"p", v:"The consistent thread across all six: spoofed senders and brand impersonation are just the entry point. Real analysis means checking where a link actually redirects to, recognising a tracking pixel for what it is, and treating any unexpected attachment as a potential payload rather than a normal file."}
       ]
     },
 
@@ -643,13 +853,43 @@
         {t:"code", v:"queue = [\"job-1\", \"job-2\", \"job-3\"]\n\nwhile len(queue) > 0:\n    current = queue.pop(0)\n    print(\"processing:\", current)\n\nfor i in range(len(queue) + 3):\n    print(\"pass\", i)"},
         {t:"p", v:"That combination is really where things get interesting: using len() alongside a while loop to control how many times it runs based on a list's actual size, or looping through a list with a for loop while checking its length to decide when to stop. Seeing how these pieces slot together, rather than just knowing each one on its own, is a good sign the fundamentals are sinking in rather than being memorised individually. It's also a decent way to spot the gaps before moving on to something new."}
       ]
+    },
+    {
+      id:"py-89",
+      cat:"py", sub:"Functions & I/O",
+      title:"Abstraction: Writing Code Other Developers Can Use",
+      date:"2026-09-17",
+      meta:"Mimo &middot; Day 89",
+      tags:["Functions","Abstraction"],
+      excerpt:"Wrapping repeated logic into a function once, so it can be reused by name without anyone needing to understand every line inside it.",
+      body:[
+        {t:"p", v:"Today's concept was abstraction, and specifically how it's used to shorten code down and make it usable by other developers, not just yourself. Rather than repeating the same block of logic every time you need it, you wrap it up once, usually as a function, and then just call that function wherever you need that behaviour again."},
+        {t:"code", v:"def is_blocklisted(ip, blocklist):\n    return ip in blocklist\n\nblocklist = [\"10.0.0.5\", \"192.168.1.2\"]\nprint(is_blocklisted(\"10.0.0.5\", blocklist))   # True"},
+        {t:"p", v:"The real value isn't just fewer lines of code. It's that once something is abstracted properly, someone else, or future you, can use it without needing to understand every line inside it. They just need to know what goes in and what comes out. That's a genuinely different way of thinking about code compared to writing one long script that does everything in sequence."},
+        {t:"p", v:"This is exactly how real tools and libraries get built. A function that checks whether an IP address is on a blocklist, or one that parses a log line into something usable, becomes something you or a teammate can reuse across different scripts without rewriting the logic each time. Writing code that other people can pick up and use is a different skill from just writing code that works, and today was the first real look at that distinction."}
+      ]
+    },
+    {
+      id:"py-90",
+      cat:"py", sub:"Functions & I/O",
+      title:"The input() Function: Letting a Program Listen",
+      date:"2026-09-18",
+      meta:"Mimo &middot; Day 90",
+      tags:["Input","Fundamentals"],
+      excerpt:"Grabbing whatever a user types so a program can respond to real information at the moment it runs, instead of everything being fixed ahead of time.",
+      body:[
+        {t:"p", v:"Today's concept was the input() function, which grabs whatever a user types and lets the program actually use it, rather than everything in a script being hardcoded ahead of time."},
+        {t:"code", v:"target_ip = input(\"Enter an IP address to check: \")\nprint(\"Checking\", target_ip, \"against the blocklist...\")"},
+        {t:"p", v:"That's a genuine shift in how a program behaves. Instead of code that only ever works with fixed values you wrote in advance, input() lets someone interacting with the program feed it real information at the moment it runs, and the program responds to whatever they actually gave it."},
+        {t:"p", v:"The security angle here is obvious once you think about it. Any tool that asks an analyst to type in an IP address to check, a username to look up, or a value to search for in a log file relies on exactly this. It's also a good reminder that anything coming from input() should never be trusted blindly, since it's the same door user input based attacks like injection ultimately walk through."}
+      ]
     }
   ];
 
   var SUBCATS = {
     all: [],
     thm: ["Frameworks","Practical Challenges","Phishing Analysis"],
-    py: ["Fundamentals","Loops","Lists","Combined Practice"]
+    py: ["Fundamentals","Loops","Lists","Functions & I/O","Combined Practice"]
   };
   var CAT_LABEL = { all:"All entries", thm:"TryHackMe", py:"Python (Mimo)" };
 
@@ -674,7 +914,7 @@
     var cats = ["all","thm","py"];
     var html = cats.map(function(c){
       var cls = "chip" + (c !== "all" ? " " + c : "");
-      return '<button class="' + cls + '" data-cat="' + c + '" aria-pressed="' + (state.cat===c) + '">' + CAT_LABEL[c] + '</button>';
+      return '<button class="' + cls + '" data-cat="' + c + '" aria-pressed="' + (state.cat===c) + '">' + (ICONS[c]||'') + '<span>' + CAT_LABEL[c] + '</span></button>';
     }).join('');
     document.getElementById('catRow').innerHTML = html;
   }
@@ -683,9 +923,9 @@
     var subs = SUBCATS[state.cat] || [];
     var row = document.getElementById('subRow');
     if(!subs.length){ row.innerHTML = ''; return; }
-    var html = '<button class="chip" data-sub="all" aria-pressed="' + (state.sub==="all") + '">All topics</button>' +
+    var html = '<button class="chip" data-sub="all" aria-pressed="' + (state.sub==="all") + '">' + (ICONS.all||'') + '<span>All topics</span></button>' +
       subs.map(function(s){
-        return '<button class="chip" data-sub="' + s + '" aria-pressed="' + (state.sub===s) + '">' + s + '</button>';
+        return '<button class="chip" data-sub="' + s + '" aria-pressed="' + (state.sub===s) + '">' + (ICONS[s]||'') + '<span>' + s + '</span></button>';
       }).join('');
     row.innerHTML = html;
   }
@@ -716,7 +956,7 @@
       var tagLabel = p.cat === "thm" ? "TryHackMe" : "Python";
       return (
         '<button class="card" data-id="' + p.id + '">' +
-          '<div class="card-top"><span class="' + tagClass + '">' + tagLabel + '</span><span class="sub">' + p.sub + '</span></div>' +
+          '<div class="card-top"><span class="' + tagClass + '">' + (ICONS[p.cat]||'') + tagLabel + '</span><span class="sub">' + (ICONS[p.sub]||'') + p.sub + '</span></div>' +
           '<h3>' + p.title + '</h3>' +
           '<div class="excerpt">' + p.excerpt + '</div>' +
           '<div class="meta">' + fmtDate(p.date) + ' &middot; ' + p.meta.split('&middot;').slice(1).join('&middot;').trim() + '</div>' +
@@ -745,13 +985,16 @@
       if(b.t === 'code'){
         return '<pre><code>' + b.v.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</code></pre>';
       }
+      if(b.t === 'diagram'){
+        return b.v;
+      }
       return '<p>' + b.v + '</p>';
     }).join('');
     var tagsHtml = p.tags.map(function(t){ return '<span>' + t + '</span>'; }).join('');
     var sheet = document.getElementById('sheet');
     sheet.innerHTML =
       '<div class="sheet-top">' +
-        '<span class="' + (p.cat==='thm' ? 'tag thm' : 'tag py') + '">' + (p.cat==='thm' ? 'TryHackMe' : 'Python') + ' &middot; ' + p.sub + '</span>' +
+        '<span class="' + (p.cat==='thm' ? 'tag thm' : 'tag py') + '">' + (ICONS[p.cat]||'') + (p.cat==='thm' ? 'TryHackMe' : 'Python') + ' &middot; ' + (ICONS[p.sub]||'') + p.sub + '</span>' +
         '<button class="sheet-close" id="sheetClose" aria-label="Close">&times;</button>' +
       '</div>' +
       '<h2>' + p.title + '</h2>' +
