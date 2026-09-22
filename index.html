@@ -656,6 +656,21 @@
         {t:"p", v:"The consistent thread across all six: spoofed senders and brand impersonation are just the entry point. Real analysis means checking where a link actually redirects to, recognising a tracking pixel for what it is, and treating any unexpected attachment as a potential payload rather than a normal file."}
       ]
     },
+    {
+      id:"thm-phishtools",
+      cat:"thm", sub:"Phishing Analysis",
+      title:"Sandboxing a Malicious Excel File Instead of Guessing",
+      date:"2026-09-20",
+      meta:"TryHackMe &middot; Phishing Analysis Tools &middot; 679-day streak &middot; 152 pts",
+      tags:["Malware Sandboxes","Phishing","MITRE ATT&CK"],
+      excerpt:"Detonating a suspicious Excel attachment in ANY.RUN instead of opening it locally, and watching it try to exploit a nine-year-old Equation Editor vulnerability in real time.",
+      body:[
+        {t:"p", v:"Third room in the Phishing Analysis module, and this one is about the tooling that turns manual guesswork into an actual investigation. Rather than just eyeballing a header, this covered the tools analysts use to pull it apart properly: Messageheader and Message Header Analyzer for parsing header data, IPinfo and Talos for reputation checks on IPs and domains, and PhishTool for pulling all of it, header, body, attachments, and VirusTotal results, into one place."},
+        {t:"p", v:"The part that stuck the most was the malware sandboxes. Tools like ANY.RUN let you detonate a suspicious attachment in an isolated environment and watch exactly what it does: what processes it spawns, what it tries to contact, what it drops onto disk, all without any of that touching a real machine."},
+        {t:"p", v:"That's exactly what the hands-on cases were built around. One case was a fake Netflix billing email with a malicious PDF, traced through ANY.RUN to a flagged IP address tied to AcroRd32.exe. The other was a rigged Excel attachment that scored a full 100 out of 100 on ANY.RUN's malicious verdict scale. Its process tree showed Excel spawning the old Equation Editor tool and exploiting CVE-2017-11882, a nine-year-old vulnerability, to run code the moment the file was opened. Mapped against MITRE ATT&CK, that behaviour lines up with T1203 for exploiting client software, plus registry and system discovery activity right after, exactly the kind of reconnaissance a payload does once it's already running."},
+        {t:"p", v:"It's one thing to be told an attachment is dangerous. It's another to actually watch it try to exploit something in a sandbox and see the technique it maps to. That gap between reading about an attack and watching one happen safely is what these tools are actually for."}
+      ]
+    },
 
     /* ===================== PYTHON / MIMO ===================== */
     {
@@ -882,6 +897,22 @@
         {t:"code", v:"target_ip = input(\"Enter an IP address to check: \")\nprint(\"Checking\", target_ip, \"against the blocklist...\")"},
         {t:"p", v:"That's a genuine shift in how a program behaves. Instead of code that only ever works with fixed values you wrote in advance, input() lets someone interacting with the program feed it real information at the moment it runs, and the program responds to whatever they actually gave it."},
         {t:"p", v:"The security angle here is obvious once you think about it. Any tool that asks an analyst to type in an IP address to check, a username to look up, or a value to search for in a log file relies on exactly this. It's also a good reminder that anything coming from input() should never be trusted blindly, since it's the same door user input based attacks like injection ultimately walk through."}
+      ]
+    },
+    {
+      id:"py-92",
+      cat:"py", sub:"Loops",
+      title:"Continue, Break, and the Loop Else: Controlling Flow Without Extra Flags",
+      date:"2026-09-20",
+      meta:"Mimo &middot; Day 92 &middot; 92-day streak",
+      tags:["Loops","Control Flow"],
+      excerpt:"Two keywords for cutting a loop short, and the lesser-known else clause that only runs when a loop finishes without ever hitting a break.",
+      body:[
+        {t:"p", v:"Today's concept was continue, break, and the else clause on a loop, three ways of controlling exactly how a loop behaves instead of just letting it run start to finish every time."},
+        {t:"p", v:"Break stops the loop completely the moment a condition is met, no matter how many iterations were left. Continue is softer. It skips just the current iteration and moves straight on to the next one, without ending the loop early."},
+        {t:"code", v:"for ip in traffic_log:\n    if ip == \"trusted-host\":\n        continue\n    if ip == known_attacker:\n        print(\"Match found:\", ip)\n        break\nelse:\n    print(\"No match found in log\")"},
+        {t:"p", v:"The else on a loop is the one that actually took some thought. It only runs if the loop completes naturally, without a break firing at any point along the way. Thinking of it in terms of searching a list made it click: if you break as soon as you find what you're after, the else block becomes the place to handle the not found case, without needing a separate true/false flag variable to track whether anything turned up."},
+        {t:"p", v:"Small pieces of control flow like this are what separate code that technically works from code that reads clearly. Being able to say exactly when a loop should stop early, skip ahead, or handle the case where nothing matched is directly useful for anything that involves scanning through logs or lists of data looking for something specific."}
       ]
     }
   ];
