@@ -671,6 +671,21 @@
         {t:"p", v:"It's one thing to be told an attachment is dangerous. It's another to actually watch it try to exploit something in a sandbox and see the technique it maps to. That gap between reading about an attack and watching one happen safely is what these tools are actually for."}
       ]
     },
+    {
+      id:"thm-phishprevent",
+      cat:"thm", sub:"Phishing Analysis",
+      title:"SPF, DKIM, and DMARC on Paper vs a Disguised Attachment on the Wire",
+      date:"2026-09-23",
+      meta:"TryHackMe &middot; Phishing Prevention &middot; 680-day streak &middot; 136 pts",
+      tags:["Email Authentication","SMTP","Wireshark"],
+      excerpt:"How SPF, DKIM, and DMARC verify a sender is who they claim to be, followed by picking a disguised, base64-encoded attachment out of a raw SMTP capture in Wireshark.",
+      body:[
+        {t:"p", v:"Fourth room in the Phishing Analysis module, and this one is about prevention rather than investigation. It covers the mechanisms that authenticate an email before it even reaches an inbox: SPF, which checks whether the sending server is authorised to send on behalf of a domain, DKIM, which verifies a digital signature so tampering in transit gets caught, and DMARC, which ties SPF and DKIM together and tells the receiving server what to do when they don't line up. S/MIME rounds it out for actually signing and encrypting the message content itself, sender and recipient certificates and all."},
+        {t:"p", v:"On paper it's clean. In practice, results like softfail sit in a grey area, the sending server can't be verified but the email gets delivered anyway, flagged as suspicious rather than blocked outright. That gap is exactly what attackers rely on."},
+        {t:"p", v:"The hands-on half of the room moved into Wireshark, picking apart a raw SMTP capture. Filtering on SMTP response codes turned up messages rejected outright, including one blocked by Spamhaus and others hit with a 552 for presenting a security issue. Switching to an IMF filter surfaced the actual message contents, including one carrying a disguised, base64-encoded attachment.scr file sent through an old Outlook Express client, exactly the kind of payload SPF, DKIM, and DMARC were never designed to catch on their own, since none of them inspect what's actually inside the message."},
+        {t:"p", v:"Authentication tells you whether a sender is who they claim to be. It says nothing about whether the attachment they sent is safe, which is exactly why prevention has to work in layers rather than relying on any single check."}
+      ]
+    },
 
     /* ===================== PYTHON / MIMO ===================== */
     {
@@ -927,6 +942,21 @@
         {t:"p", v:"A \"sharpen your tools\" review round on continue, break, and the loop else, the same three concepts from a couple of days ago, but this time the focus was on practice rather than learning something new."},
         {t:"p", v:"Understanding a concept when it's explained is one thing. Reaching for the right one correctly while staring at a blank exercise is a different skill, and that's what this session was actually about, working through it enough times that it starts to feel automatic rather than something to look up."},
         {t:"p", v:"Ninety-four days into this now, and it's these repeat passes over the same fundamentals that seem to be what actually makes them stick, rather than just moving on to the next new topic the moment something is technically understood."}
+      ]
+    },
+    {
+      id:"py-95",
+      cat:"py", sub:"Loops",
+      title:"Writing Loops From Scratch Instead of Filling in Blanks",
+      date:"2026-09-23",
+      meta:"Mimo &middot; Day 95 &middot; 95-day streak",
+      tags:["Loops","Counter Variables"],
+      excerpt:"Writing original loop code from a blank page to test real understanding of counter variables and loop conditions, rather than completing a set exercise.",
+      body:[
+        {t:"p", v:"More loop practice today, but this time writing original code from scratch rather than following a set exercise, specifically to test whether counter variables and loop conditions actually made sense or were just being pattern matched from examples."},
+        {t:"code", v:"count = 0\nwhile count < 5:\n    print(\"Checking item\", count)\n    count += 1\nelse:\n    print(\"Finished checking all items\")"},
+        {t:"p", v:"Reading someone else's loop and understanding why it stops is one thing. Writing one from a blank page means deciding for yourself where the counter starts, what it increments by, and exactly what condition ends the loop, rather than recognising a pattern that's already been laid out."},
+        {t:"p", v:"It's a small shift, but a real one. Being able to reason through a loop's logic well enough to build it yourself, instead of just following one, is the actual skill being tested here."}
       ]
     }
   ];
